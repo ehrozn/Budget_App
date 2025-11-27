@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #343a40;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: auto; /* Позволяет прокрутку, если контент выходит за границы */
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 2em;
+            color: #343a40;
+        }
+        .button-container {
+            text-align: center;
+            margin: 10px;
+        }
+        .button-container button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: calc(50% - 10px);
+        }
+        .button-container button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        table {
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin: 20px auto; /* Центрирование таблицы и отступы */
+        }
+        td {
+            border: 1px solid #ccc;
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            position: relative;
+        }
+        td input {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            font-size: 18px;
+            border: none;
+            background-color: transparent;
+        }
+        td input:focus {
+            outline: none;
+            background-color: #e9ecef;
+        }
+        td input[disabled] {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        .block-top {
+            border-top: 2px solid #000;
+        }
+        .block-left {
+            border-left: 2px solid #000;
+        }
+        .block-bottom {
+            border-bottom: 2px solid #000;
+        }
+        .block-right {
+            border-right: 2px solid #000;
+        }
+        #result {
+            text-align: center;
+            font-size: 16px;
+            margin-top: 10px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        #result.correct {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        #result.incorrect {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        #rules {
+            text-align: center;
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+        }
+        #rules h2 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        #rules p {
+            margin-bottom: 0;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sudoku Game</h1>
+    <div class="button-container">
+        <button id="btn-4x4">4x4</button>
+        <button id="btn-9x9">9x9</button>
+    </div>
+    <table id="sudoku-table">
+        <!-- Здесь будет наша таблица судоку -->
+    </table>
+    <div class="button-container">
+        <button id="check-button">Check Sudoku</button>
+        <button id="hint-button">Hint</button>
+    </div>
+    <div class="button-container">
+        <button id="save-button">Save Progress</button>
+        <button id="reset-button">Reset Game</button>
+    </div>
+    <p id="result"></p>
+    <div id="rules">
+        <h2>Rules</h2>
+        <p id="rules-text">Select a Sudoku grid size to view the rules.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const table = document.getElementById('sudoku-table');
+            const rulesText = document.getElementById('rules-text');
+            const resultText = document.getElementById('result');
+            let currentSize = 4;
+
+            function generateEmptyGrid(size) {
+                return Array.from({ length: size * size }, () => 0);
+            }
+
+            function isSafe(grid, size, row, col, num) {
+                const sqrtSize = Math.sqrt(size);
+
+                // Check row and column
+                for (let x = 0; x < size; x++) {
+                    if (grid[row * size + x] === num || grid[x * size + col] === num) {
+                        return false;
+                    }
+                }
+
+                // Check subgrid
+                const startRow = row - row % sqrtSize;
+                const startCol = col - col % sqrtSize;
+                for (let i = 0; i < sqrtSize; i++) {
+                    for (let j = 0; j < sqrtSize; j++) {
+                        if (grid[(i + startRow) * size + (j + startCol)] === num) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            function fillSudoku(grid, size) {
+                for (let i = 0; i < size * size; i++) {
+                    if (grid[i] === 0) {
+                        const row = Math.floor(i / size);
+                        const col = i % size;
+                        const nums = Array.from({ length: size }, (_, k) => k + 1).sort(() => Math.random() - 0.5);
+                        for (const num of nums) {
+                            if (isSafe(grid, size, row, col, num)) {
+                                grid[i] = num;
+                                if (fillSudoku(grid, size)) {
+                                    return true;
+                                }
+                                grid[i] = 0;
+                            }
+                        }
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            function generateSudoku(size) {
+                currentSize = size;
+                table.innerHTML = ''; // Очистка таблицы
+                table.style.width = `${size * 50}px`;
+                table.style.height = `${size * 50}px`;
+
+                const sqrtSize = Math.sqrt(size);
+                let rules;
+
+                if (size === 4) {
+                    rules = "4x4 Sudoku: Fill the grid with numbers 1 to 4 so that each number appears exactly once in each row, column, and 2x2 subgrid.";
+                } else if (size === 9) {
+                    rules = "9x9 Sudoku: Fill the grid with numbers 1 to 9 so that each number appears exactly once in each row, column, and 3x3 subgrid.";
+                }
+                rulesText.innerText = rules;
+
+                // Создание таблицы пустых ячеек
+                for (let row = 0; row < size; row++) {
+                    let tr = document.createElement('tr');
+                    for (let col = 0; col < size; col++) {
+                        let td = document.createElement('td');
+                        if (row % sqrtSize === 0 && row !== 0) {
+                            td.classList.add('block-top');
+                        }
+                        if (col % sqrtSize === 0 && col !== 0) {
+                            td.classList.add('block-left');
+                        }
+                        if (row === size - 1) {
+                            td.classList.add('block-bottom');
+                        }
+                        if (col === size - 1) {
+                            td.classList.add('block-right');
+                        }
+                        let input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 1;
+                        td.appendChild(input);
+                        tr.appendChild(td);
+                    }
+                    table.appendChild(tr);
+                }
+
+                // Генерация решаемой сетки судоку
+                const grid = generateEmptyGrid(size);
+                fillSudoku(grid, size);
+
+                // Заполнение ячеек в зависимости от размера
+                let fillPercentage;
+                if (size === 4) {
+                    fillPercentage = 25;
+                } else if (size === 9) {
+                    fillPercentage = 30;
+                }
+                const numCellsToFill = Math.floor(size * size * fillPercentage / 100);
+                const cellsToFill = [];
+                while (cellsToFill.length < numCellsToFill) {
+                    const randIndex = Math.floor(Math.random() * size * size);
+                    if (!cellsToFill.includes(randIndex)) {
+                        cellsToFill.push(randIndex);
+                    }
+                }
+                cellsToFill.forEach(index => {
+                    const row = Math.floor(index / size);
+                    const col = index % size;
+                    table.rows[row].cells[col].querySelector('input').value = grid[index];
+                });
+
+                resultText.innerText = ''; // Очистка результата
+            }
+
+            function checkSudoku() {
+                const cells = table.querySelectorAll('input');
+                const size = currentSize;
+                let isCorrect = true;
+
+                // Проверка по строкам, столбцам и блокам
+                const isValid = (arr) => {
+                    const values = arr.map(input => input.value).filter(val => val);
+                    return new Set(values).size === values.length;
+                };
+
+                for (let row = 0; row < size; row++) {
+                    const rowCells = Array.from(table.rows[row].cells);
+                    if (!isValid(rowCells)) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
+
+                for (let col = 0; col < size; col++) {
+                    const colCells = Array.from(table.querySelectorAll(`td:nth-child(${col + 1})`));
+                    if (!isValid(colCells)) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
+
+                const sqrtSize = Math.sqrt(size);
+                for (let startRow = 0; startRow < size; startRow += sqrtSize) {
+                    for (let startCol = 0; startCol < size; startCol += sqrtSize) {
+                        const blockCells = [];
+                        for (let row = startRow; row < startRow + sqrtSize; row++) {
+                            for (let col = startCol; col < startCol + sqrtSize; col++) {
+                                blockCells.push(table.rows[row].cells[col].querySelector('input'));
+                            }
+                        }
+                        if (!isValid(blockCells)) {
+                            isCorrect = false;
+                            break;
+                        }
+                    }
+                    if (!isCorrect) break;
+                }
+
+                if (isCorrect) {
+                    resultText.innerText = 'Sudoku is correct!';
+                    resultText.className = 'correct';
+                } else {
+                    resultText.innerText = 'Sudoku is incorrect!';
+                    resultText.className = 'incorrect';
+                }
+            }
+
+            function generateHint() {
+                const inputs = table.querySelectorAll('input');
+                const emptyInputs = Array.from(inputs).filter(input => !input.value);
+                if (emptyInputs.length === 0) {
+                    resultText.innerText = 'No empty cells to hint.';
+                    return;
+                }
+
+                const randInput = emptyInputs[Math.floor(Math.random() * emptyInputs.length)];
+                const row = randInput.parentElement.parentElement.rowIndex;
+                const col = randInput.parentElement.cellIndex;
+                const grid = generateEmptyGrid(currentSize);
+                fillSudoku(grid, currentSize);
+
+                randInput.value = grid[row * currentSize + col];
+            }
+
+            function saveProgress() {
+                // Заменить на реальную реализацию сохранения
+                resultText.innerText = 'Progress saved!';
+                resultText.className = 'correct';
+            }
+
+            function resetGame() {
+                generateSudoku(currentSize);
+            }
+
+            document.getElementById('btn-4x4').addEventListener('click', () => generateSudoku(4));
+            document.getElementById('btn-9x9').addEventListener('click', () => generateSudoku(9));
+            document.getElementById('check-button').addEventListener('click', checkSudoku);
+            document.getElementById('hint-button').addEventListener('click', generateHint);
+            document.getElementById('save-button').addEventListener('click', saveProgress);
+            document.getElementById('reset-button').addEventListener('click', resetGame);
+        });
+    </script>
+</body>
+</html>

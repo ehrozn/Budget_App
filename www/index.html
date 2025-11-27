@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Современная система регистрации и входа с красивым дизайном">
+    <title>Регистрация и Вход | Auth App</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="auth-app.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="auth-card">
+            <!-- LOGIN FORM -->
+            <form id="loginForm" class="form form-visible">
+                <div class="card-header">
+                    <h1 class="card-title">Добро пожаловать</h1>
+                    <p class="card-subtitle">Войдите в свой аккаунт</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginEmail" class="form-label">Email</label>
+                    <div class="input-with-icon">
+                        <input type="email" id="loginEmail" class="form-input" placeholder="example@email.com" required>
+                        <span class="input-icon">📧</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword" class="form-label">Пароль</label>
+                    <div class="input-with-icon">
+                        <input type="password" id="loginPassword" class="form-input" placeholder="Введите пароль"
+                            required>
+                        <span class="input-icon">🔒</span>
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="rememberMe" class="checkbox">
+                    <label for="rememberMe" class="checkbox-label">Запомнить меня</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full mt-md">
+                    Войти
+                </button>
+
+                <p class="text-center text-muted mt-md">
+                    Нет аккаунта?
+                    <a href="#" class="link" id="showRegister">Зарегистрироваться</a>
+                </p>
+            </form>
+
+            <!-- REGISTRATION FORM -->
+            <form id="registerForm" class="form form-hidden">
+                <div class="card-header">
+                    <h1 class="card-title">Создать аккаунт</h1>
+                    <p class="card-subtitle">Присоединяйтесь к нам сегодня</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerName" class="form-label">Имя</label>
+                    <div class="input-with-icon">
+                        <input type="text" id="registerName" class="form-input" placeholder="Ваше имя" required>
+                        <span class="input-icon">👤</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerEmail" class="form-label">Email</label>
+                    <div class="input-with-icon">
+                        <input type="email" id="registerEmail" class="form-input" placeholder="example@email.com"
+                            required>
+                        <span class="input-icon">📧</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPassword" class="form-label">Пароль</label>
+                    <div class="input-with-icon">
+                        <input type="password" id="registerPassword" class="form-input" placeholder="Минимум 8 символов"
+                            required minlength="8">
+                        <span class="input-icon">🔒</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPasswordConfirm" class="form-label">Подтвердите пароль</label>
+                    <div class="input-with-icon">
+                        <input type="password" id="registerPasswordConfirm" class="form-input"
+                            placeholder="Повторите пароль" required minlength="8">
+                        <span class="input-icon">🔐</span>
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="agreeTerms" class="checkbox" required>
+                    <label for="agreeTerms" class="checkbox-label">
+                        Я согласен с условиями использования
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full mt-md">
+                    Зарегистрироваться
+                </button>
+
+                <p class="text-center text-muted mt-md">
+                    Уже есть аккаунт?
+                    <a href="#" class="link" id="showLogin">Войти</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="auth-app.js"></script>
+</body>
+
+</html>
